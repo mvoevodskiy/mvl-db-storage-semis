@@ -1,8 +1,8 @@
 {
-  "name": "mvl-blank-project",
+  "name": "mvl-db-storage-semis",
   "version": "0.0.1",
   "description": "",
-  "main": "src/mvlblankproject.js",
+  "main": "src/dbstoragesemis.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
