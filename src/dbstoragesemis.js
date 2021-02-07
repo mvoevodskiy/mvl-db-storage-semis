@@ -25,7 +25,7 @@ class mvlDBStorageSemis extends MVLoaderBase {
 
   async migrateStorageToDB () {
     if (!(await this.App.DB.models.mvlDBStorage.count())) {
-      const rows = []
+      const promises = []
       for (let filename in this.config.fileStoragePrefixes) {
         if (Object.prototype.hasOwnProperty.call(this.config.fileStoragePrefixes, filename)) {
           // console.log('FILENAME', filename)
@@ -33,19 +33,22 @@ class mvlDBStorageSemis extends MVLoaderBase {
             if (!fs.existsSync(filename)) continue
             const storage = JSON.parse(fs.readFileSync(filename))
             for (let key in storage) {
-              if (Object.prototype.hasOwnProperty.call(storage, key)) rows.push({
-                key: this.config.fileStoragePrefixes[filename] + key,
-                value: storage[key]
-              })
+              if (Object.prototype.hasOwnProperty.call(storage, key)) {
+                promises.push(
+                  (() => this.App.DB.models.mvlDBStorage.create({
+                    key: this.config.fileStoragePrefixes[filename] + key,
+                    value: storage[key]
+                  }))()
+                )
+              }
             }
           } catch (e) {
             console.log(e)
           }
         }
       }
-      if (rows.length) await this.App.DB.models.mvlDBStorage.bulkCreate(rows)
-    }
-  }
+      return Promise.all(promises)
+    }}
 }
 
 mvlDBStorageSemis.exportConfig = {
