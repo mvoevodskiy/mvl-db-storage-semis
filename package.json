@@ -1,6 +1,6 @@
 {
   "name": "mvl-db-storage-semis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "src/dbstoragesemis.js",
   "scripts": {
