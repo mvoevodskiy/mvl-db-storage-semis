@@ -1,9 +1,15 @@
 const { MVLoaderBase } = require('mvloader')
 const Store = require('./store')
+const fs = require('fs')
 
-class BotDBStorageSemis extends MVLoaderBase {
+class mvlDBStorageSemis extends MVLoaderBase {
   constructor (App, ...config) {
-    const localDefaults = {}
+    const localDefaults = {
+      fileStoragePrefixes: {
+        'sessions.json': 'ses:',
+        'storage.json': 'store:'
+      }
+    }
     super(localDefaults, ...config)
     this.App = App
   }
@@ -13,11 +19,36 @@ class BotDBStorageSemis extends MVLoaderBase {
   }
 
   async initFinish () {
-    super.initFinish()
+    await super.initFinish()
+    await this.migrateStorageToDB()
+  }
+
+  async migrateStorageToDB () {
+    if (!(await this.App.DB.models.mvlDBStorage.count())) {
+      const rows = []
+      for (let filename in this.config.fileStoragePrefixes) {
+        if (Object.prototype.hasOwnProperty.call(this.config.fileStoragePrefixes, filename)) {
+          // console.log('FILENAME', filename)
+          try {
+            if (!fs.existsSync(filename)) continue
+            const storage = JSON.parse(fs.readFileSync(filename))
+            for (let key in storage) {
+              if (Object.prototype.hasOwnProperty.call(storage, key)) rows.push({
+                key: this.config.fileStoragePrefixes[filename] + key,
+                value: storage[key]
+              })
+            }
+          } catch (e) {
+            console.log(e)
+          }
+        }
+      }
+      if (rows.length) await this.App.DB.models.mvlDBStorage.bulkCreate(rows)
+    }
   }
 }
 
-BotDBStorageSemis.exportConfig = {
+mvlDBStorageSemis.exportConfig = {
   ext: {
     classes: {
       semis: {},
@@ -56,4 +87,4 @@ BotDBStorageSemis.exportConfig = {
   db: {}
 }
 
-module.exports = BotDBStorageSemis
+module.exports = mvlDBStorageSemis
