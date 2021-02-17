@@ -11,13 +11,13 @@ const { MVLoaderBase } = require('mvloader')
  */
 
 class Store extends MVLoaderBase {
-  constructor (StorageManager, config) {
+  constructor (SMorApp, config) {
     const localConfig = {
       prefix: ''
     }
     super(localConfig, config)
-    this.SM = StorageManager
-    // console.log('STORE CONSTRUCTED. STORAGE MANAGER', StorageManager, 'CONFIG', this.config)
+    this.App = (SMorApp.BC || SMorApp)
+    // console.log('STORE CONSTRUCTED. STORAGE MANAGER', SMorApp, 'CONFIG', this.config)
   }
 
   async init () {
@@ -31,13 +31,13 @@ class Store extends MVLoaderBase {
   async get (key) {
     key = this.config.prefix + key
     // console.log('STORE GET. KEY', key)
-    const storageEntry = await this.SM.BC.DB.models.mvlDBStorage.findByPk(key)
+    const storageEntry = await this.App.DB.models.mvlDBStorage.findByPk(key)
     return storageEntry !== null ? storageEntry.value : {}
   }
 
   async set (key, value) {
     // console.log('STORE. SET KEY', key, 'VALUE KEYS', Object.keys(value))
-    return await this.SM.BC.DB.models.mvlDBStorage.upsert({key: this.config.prefix + key, value})
+    return await this.App.DB.models.mvlDBStorage.upsert({key: this.config.prefix + key, value})
       .catch(error => console.error('ERROR UPDATING STORAGE ', key, ':', error))
   }
 }
