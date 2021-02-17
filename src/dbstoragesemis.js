@@ -56,7 +56,9 @@ mvlDBStorageSemis.exportConfig = {
     classes: {
       semis: {},
       controllers: {},
-      handlers: {}
+      handlers: {
+        DBStorage: Store
+      }
     },
     configs: {
       controllers: {},
